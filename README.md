@@ -24,11 +24,10 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    ```
 1. Go up one directory level: `$ cd ..`
 1. Clone the pxc-release repo: `git clone https://github.com/cloudfoundry-incubator/pxc-release.git`
-1. We'll follow the  
-   [instructions for deploying a standalone MySQL](https://github.com/cloudfoundry-incubator/pxc-release#deploying-pxc-release-standalone),  
-   with additional "aspects", like creating a database, with a user and password.
-1. There are a couple of prerequites which aren't specifically called out in that procedure.  The first of which is to  
-   [upload the stemcell](https://bosh.io/docs/uploading-stemcells/), which took about 5 minutes for me:
+1. We'll follow the [instructions for deploying a standalone MySQL](https://github.com/cloudfoundry-incubator/pxc-release#deploying-pxc-release-standalone),  
+   with additional "aspects", such as creating a database, with a user and password.
+1. There are a couple of prerequisites which aren't specifically called out in that procedure.  The first of which is to  
+   [upload the stemcell](https://bosh.io/docs/uploading-stemcells/) (takes about 5 minutes):
    ```
    $ bosh upload-stemcell \
      https://s3.amazonaws.com/bosh-aws-light-stemcells/250.29/light-bosh-stemcell-250.29-aws-xen-hvm-ubuntu-xenial-go_agent.tgz \
@@ -44,7 +43,7 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ bosh upload-release --sha1 eb53d366af2d6e49e8c2ac834191547b2ba44d30 \
      https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.16.0
    ```
-1. Create the `ops file` instructing BOSH to create a database and a user.  Here's an example:
+1. Create the `ops file` instructing BOSH to create a database and a user.  [Here's an example](./seeded-databases.yml):
    ```
    $ cat  pxc-release/operations/seeded-databases.yml
    ---
@@ -54,7 +53,7 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
      value:
        name: demo_db
        username: demo_user
-       password: demo_password
+       password: changeme
    ```
 1. Deploy the MySQL release, which took 23 minutes in my case:  
    ```
@@ -64,4 +63,3 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    bosh -d pxc deploy $pxc/pxc-deployment.yml -o $ops/seeded-databases.yml
    ```
  1. Run `bosh vms` to get the
- 

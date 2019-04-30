@@ -1,0 +1,9 @@
+---
+
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=pxc-mysql/properties/seeded_databases?/name=demo_db?
+  value:
+    name: demo_db
+    username: demo_user
+    password: changeme
+
