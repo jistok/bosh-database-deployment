@@ -102,3 +102,5 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
 [Example ops file](https://github.com/cloudfoundry-incubator/mysql-monitoring-release/blob/master/operations/pxc-add-metrics.yml)
 
 [Example of "seeded databases"](https://bosh.io/jobs/pxc-mysql?source=github.com/cloudfoundry-incubator/pxc-release&version=0.16.0#p%3dseeded_databases)
+
+[Postgres release](https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=36)
