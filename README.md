@@ -7,9 +7,9 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
 
 ## Here's the procedure (assuming you're running a Mac / OSX)
 
-1. [Install Dependencies](https://github.com/cloudfoundry/bosh-bootloader#prerequisites)
-1. [Install bosh-bootloader](https://github.com/cloudfoundry/bosh-bootloader#install-bosh-bootloader-using-a-package-manager)
-   The IaaS-specific guides aren't consistent about the state directory, so do this now:  
+1. [Install Dependencies](https://github.com/cloudfoundry/bosh-bootloader#prerequisites).
+1. [Install bosh-bootloader](https://github.com/cloudfoundry/bosh-bootloader#install-bosh-bootloader-using-a-package-manager).
+   The IaaS-specific guides aren't consistent about the state directory, so do this now (name it whatever you prefer):  
    ```
    $ mkdir some-state-dir
    $ cd some-state-dir
@@ -43,7 +43,8 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ bosh upload-release --sha1 eb53d366af2d6e49e8c2ac834191547b2ba44d30 \
      https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.16.0
    ```
-1. Create the `ops file` instructing BOSH to create a database and a user.  [Here's an example](./seeded-databases.yml):  
+1. Create the `ops file` instructing BOSH to create a database and a user, using your own values for `name`, `username`,
+   and `password`.  [Here's an example](./seeded-databases.yml):  
    ```
    $ cat  pxc-release/operations/seeded-databases.yml
    ---
@@ -62,4 +63,37 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
 
    bosh -d pxc deploy $pxc/pxc-deployment.yml -o $ops/seeded-databases.yml
    ```
- 1. Run `bosh vms` to get the
+ 1. Run `bosh vms` to get the deployment name and instance ID needed to SSH into the VM:  
+    ```
+    $ bosh vms
+    Using environment 'https://10.0.0.6:25555' as client 'admin'
+
+    Task 66. Done
+
+    Deployment 'pxc'
+
+    Instance                                    Process State  AZ  IPs        VM CID               VM Type  Active
+    mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94  running        z1  10.0.16.4  i-05066433338553a1d  default  true
+
+    1 vms
+
+    Succeeded
+    ```
+1. SSH into the VM so that you can connect to MySQL:  
+   ```
+   $ bosh ssh -d pxc mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94
+   Using environment 'https://10.0.0.6:25555' as client 'admin'
+
+   Using deployment 'pxc'
+
+   Task 67. Done
+   Unauthorized use is strictly prohibited. All access and activity
+   is subject to logging and monitoring.
+   Welcome to Ubuntu 16.04.6 LTS (GNU/Linux 4.15.0-47-generic x86_64)
+
+   [...]
+
+   mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94:~$
+
+   ```
+   
