@@ -43,8 +43,8 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ bosh upload-release --sha1 eb53d366af2d6e49e8c2ac834191547b2ba44d30 \
      https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.16.0
    ```
-1. Create the `ops file` instructing BOSH to create a database and a user, using your own values for `name`, `username`,
-   and `password`.  [Here's an example](./seeded-databases.yml):  
+1. Create the [ops file](https://bosh.io/docs/cli-ops-files/) instructing BOSH to create a database and a user,
+   using your own values for `name`, `username`,  and `password`. [Here's an example](./seeded-databases.yml):  
    ```
    $ cat  pxc-release/operations/seeded-databases.yml
    ---
@@ -96,4 +96,7 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94:~$
 
    ```
-   
+
+## References not already linked above
+
+[Example ops file](https://github.com/cloudfoundry-incubator/mysql-monitoring-release/blob/master/operations/pxc-add-metrics.yml)
