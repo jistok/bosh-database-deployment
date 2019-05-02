@@ -96,6 +96,14 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94:~$
 
    ```
+1. Use `bosh ssh ...` to create an SSH tunnel so that clients can connect to the DB
+   ```
+   $ bosh ssh -d pxc mysql/2e09b422-cab0-4d2f-846d-3ea8f3a7bf94 --opts="-L 0.0.0.0:13306:127.0.0.1:3306"
+   ```
+1. Now your MySQL client can connect to port 13306 on localhost
+   ```
+   $ mysql -h 127.0.0.1 -u demo_user -pchangeme demo_db -P 13306
+   ```
 
 ## References not already linked above
 
