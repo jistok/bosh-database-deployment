@@ -76,5 +76,5 @@ limit 25;
 
 Plotting the first value on a map, using Google Maps:
 
-![map of area with highest pub density](https://www.google.com/maps/search/Bars+and+pubs/@53.7980788,-1.5764026,13z/data=!4m7!2m6!3m5!1sBars+and+pubs!2s53.8,-1.54!4m2!1d-1.54!2d53.8)
+![map of area with highest pub density](./high_pub_density_area.png)
 
