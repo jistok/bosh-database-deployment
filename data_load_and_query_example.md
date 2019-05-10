@@ -44,7 +44,7 @@ data files:
 
 I think I started with something like this, prior to adding those indexed on `k` and `v`:
 
-```
+```sql
 select v, count(*)
 from osm_k_v
 where k = 'amenity'
@@ -53,10 +53,28 @@ order by 2 desc
 limit 30;
 ```
 
-I then added the indexes, tried it again, and noticed the change.  Since the data has a geospatial aspect,
+I then added the indexes, tried it again, and noticed the change.
+
+Since the data has a geospatial aspect,
 some of the built-in MySQL GIS capabilities would be interesting to try out.
 [Here](https://dev.mysql.com/doc/refman/8.0/en/spatial-geohash-functions.html), for example, is some
 documentation on `ST_GeoHash(longitude, latitude, max_length)`.
 [This table](https://en.wikipedia.org/wiki/Geohash#Number_of_geohash_characters_and_precision_in_km) may
-also be helpful.
+also be helpful.  Having said all that, here's my initial stab at finding areas within this part of the
+UK with "high pub density":
+
+```sql
+select ST_AsText(ST_PointFromGeoHash(ST_GeoHash(o.lon, o.lat, 6), 0)), count(*)
+from osm o, osm_k_v okv
+where
+  okv.k = 'amenity' and okv.v = 'pub'
+  and o.id = okv.id
+group by 1
+order by 2 desc
+limit 25;
+```
+
+Plotting the first value on a map, using Google Maps:
+
+![map of area with highest pub density](https://www.google.com/maps/search/Bars+and+pubs/@53.7980788,-1.5764026,13z/data=!4m7!2m6!3m5!1sBars+and+pubs!2s53.8,-1.54!4m2!1d-1.54!2d53.8)
 
