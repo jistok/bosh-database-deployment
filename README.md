@@ -105,6 +105,10 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ mysql -h 127.0.0.1 -u demo_user -pchangeme demo_db -P 13306
    ```
 
+## Where to, next?
+
+Consider trying out this [Little MySQL Exercise, with Data](./data_load_and_query_example.md)
+
 ## References not already linked above
 
 [Example ops file](https://github.com/cloudfoundry-incubator/mysql-monitoring-release/blob/master/operations/pxc-add-metrics.yml)
