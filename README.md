@@ -1,6 +1,6 @@
-# Standalone MySQL via BOSH
+# Standalone Database Instance via BOSH
 
-## Goal: deploy and manage instances of Pivotal MySQL without needing a PCF/PAS installation
+## Goal: deploy and manage instances of Pivotal MySQL or Postgres without needing a PCF/PAS installation
 
 This approach uses BOSH Bootloader, aka _bbl_, to deploy/configure a BOSH Director in a cloud.  
 Once that Director is deployed, the BOSH steps should run similarly, regardless of which cloud you've deployed to.
@@ -15,7 +15,13 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ cd some-state-dir
    ```
 1. [Follow the appropriate IaaS-specific guide](https://github.com/cloudfoundry/bosh-bootloader#iaas-specific-getting-started-guides).
-   **Caveat**: I was unsuccessful using GCP, but AWS EC2 worked just fine.
+   For example here are the exports we used for our GCP project:
+
+   ```bash
+   export BBL_IAAS=gcp
+   export BBL_GCP_REGION=us-central1
+   export BBL_GCP_SERVICE_ACCOUNT_KEY="</path/to/key.json>"
+   ```
 1. Once that part is finished,
    [target the BOSH Director](https://github.com/cloudfoundry/bosh-bootloader/blob/master/docs/howto-target-bosh-director.md),
    so that you can move on to deploying your BOSH release.  This entails the following, from within `some-state-dir`:  
@@ -23,6 +29,8 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ eval "$(bbl print-env)"
    ```
 1. Go up one directory level: `$ cd ..`
+
+## Follow the steps below for a standalone MySQL service instance
 1. Clone the pxc-release repo: `git clone https://github.com/cloudfoundry-incubator/pxc-release.git`
 1. We'll follow the [instructions for deploying a standalone MySQL](https://github.com/cloudfoundry-incubator/pxc-release#deploying-pxc-release-standalone),
    with additional "aspects", such as creating a database, with a user and password.
@@ -105,9 +113,87 @@ Once that Director is deployed, the BOSH steps should run similarly, regardless 
    $ mysql -h 127.0.0.1 -u demo_user -pchangeme demo_db -P 13306
    ```
 
-## Where to, next?
+### Where to, next?
 
 Consider trying out this [Little MySQL Exercise, with Data](./data_load_and_query_example.md)
+
+## Follow the steps below for a standalone PostgreSQL service instance
+
+1. Clone the postgres-release repo: `git clone https://github.com/cloudfoundry/postgres-release.git`
+1. We will follow the [instructions for deploying a standalone postgreSQL service instance](https://github.com/cloudfoundry/postgres-release#deploying). 
+Since we already have a BOSH director, we will start with uploading a stemcell directly.
+1.  Upload the desired IAAS stemcell directly to bosh. [bosh.io](https://bosh.io/stemcells) provides an easy interface to find and download stemcells.
+
+    ```bash
+    # Example for GCP
+    $ bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent
+    ```
+1. Upload the latest release from [bosh.io](https://bosh.io/releases/github.com/cloudfoundry/postgres-release?all=1)
+
+    ```bash
+    $ bosh upload-release https://bosh.io/d/github.com/cloudfoundry/postgres-release
+    ```
+1. Create the [ops file](https://bosh.io/docs/cli-ops-files/) instructing BOSH to create a database and a user,
+   using your own values for `port`, `database`,  `role` and `password`. [Here's an example](https://github.com/cloudfoundry/postgres-release/blob/develop/templates/operations/set_properties.yml):
+
+   ```bash
+   $ cat  postgres-release/templates/operations/set_properties.yml
+   ---
+
+    - type: replace
+      path: /instance_groups/name=postgres/jobs/name=postgres/properties?/databases/port
+      value: 5524
+
+    - type: replace
+      path: /instance_groups/name=postgres/jobs/name=postgres/properties?/databases/databases/name=sandbox?
+      value:
+        name: sandbox
+        citext: true
+
+    - type: replace
+      path: /instance_groups/name=postgres/jobs/name=postgres/properties?/databases/roles/name=pgadmin?
+      value:
+        name: pgadmin
+        password: ((pgadmin_database_password))
+        permissions:
+        - "CONNECTION LIMIT 50"
+
+    - type: replace
+      path: /variables?/name=pgadmin_database_password?
+      value:
+        name: pgadmin_database_password
+        type: password
+   ```
+1. Generate a manifest file using the command below:
+    ```bash
+    postgres-release/scripts/generate-deployment-manifest \
+    -o templates/operations/set_properties.yml > postgres-deployment.yml
+
+    ```
+
+1. Deploy the postgres release using the generated manifest and inject a password:
+   ```bash
+   $ postgres="postgres-release"
+   $ ops="$postgres/templates/operations"
+
+   $ bosh -d postgres deploy postgres-deployment.yml -v pgadmin_database_password=foobarbaz
+   ```
+1. To ssh into the vm:
+
+    ```bash
+    $ bosh -d postgres ssh postgres
+    ```
+1. In order to use psql from your local machine, we need to setup port forwarding via a ssh connection as below:
+
+    ```bash
+    $ bosh -d postgres ssh postgres --opts="-L 0.0.0.0:5432:127.0.0.1:5524"
+
+    ```
+    In another shell, you can use psql to connect to port 5432 on your local machine to get to the postgres instance as below:
+
+    ```bash
+    $ psql -h 127.0.0.1 -U pgadmin -d sandbox
+    ```
 
 ## References not already linked above
 
